@@ -105,3 +105,52 @@ export const deleteCheque = async (req, res) => {
       .json({ message: "Internal server error", error: error.message });
   }
 };
+
+export const searchCheque = async (req, res) => {
+  try {
+    const filters = req.query;
+
+    if (Object.keys(filters).length === 0)
+      return res.status(400).json({ message: "Filter keyword is empty" });
+
+    const filterList = [
+      "bank",
+      "recipient",
+      "chequeNumber",
+      "note",
+      "status",
+      "amount",
+    ];
+
+    let query = {};
+    for (const filterKey of filterList) {
+      if (filters[filterKey] && filterKey !== "amount") {
+        query[filterKey] = new RegExp(
+          filters[filterKey].trim().replace(/\s+/g, " "),
+          "i"
+        );
+        console.log(typeof filters[filterKey]);
+      } else if (filters[filterKey] && filterKey === "amount") {
+        query[filterKey] = filters[filterKey];
+      }
+    }
+
+    if (Object.keys(query).length === 0)
+      return res
+        .status(400)
+        .json({ message: "Not a valid filter or Search query is empty" });
+
+    console.log("query", query);
+
+    const cheque = await Cheque.find(query);
+
+    if (cheque.length === 0)
+      return res.status(400).json({ message: "No cheques found" });
+
+    res.status(200).json({ message: "Performed query action", cheque });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
