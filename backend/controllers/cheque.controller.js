@@ -154,3 +154,18 @@ export const searchCheque = async (req, res) => {
       .json({ message: "Internal server error", error: error.message });
   }
 };
+
+export const fetchAllCheque = async (req, res) => {
+  try {
+    const cheque = await Cheque.find();
+    if (!cheque) return res.status(400).json({ message: "No cheques found" });
+
+    res
+      .status(200)
+      .json({ message: "Fetched all cheques successfully", cheque });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
